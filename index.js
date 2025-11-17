@@ -9,3 +9,15 @@ const db = require("./database");
 
 const app = express();
 const PORT = 3000;
+
+//Security Middleware
+app.use(helmet()); // CSP, XSS protection, secure headers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload());
+app.use(express.static("public"));
+
+//Check Server Port
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
