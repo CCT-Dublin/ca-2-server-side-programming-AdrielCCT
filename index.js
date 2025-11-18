@@ -21,3 +21,39 @@ app.use(express.static("public"));
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+//Check Database
+db.ensureSchema();
+
+//Route Csv Upload
+app.post("/upload-csv", async (req, res) => {
+    try {
+        if (!req.files || !req.files.csvfile) {
+            return res.status(400).send("CSV file missing.");
+        }
+
+        const csvFile = req.files.csvfile;
+        const uploadPath = path.join(__dirname, "uploads", "dataset.csv");
+
+        await csvFile.mv(uploadPath);
+
+        const csvData = fs.readFileSync(uploadPath, "utf8");
+        const { validRows, errors } = validateCSV(csvData);
+
+        if (errors.length > 0) {
+            return res.status(400).json({
+                message: "Invalid CSV rows found.",
+                errors,
+            });
+        }
+
+        for (const row of validRows) {
+            await db.insertRow(row);
+        }
+
+        res.json({ message: "CSV processed successfully", inserted: validRows.length });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal server error");
+    }
+});
