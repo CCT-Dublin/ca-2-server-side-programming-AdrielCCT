@@ -57,3 +57,25 @@ app.post("/upload-csv", async (req, res) => {
         res.status(500).send("Internal server error");
     }
 });
+
+//Route: form submission
+app.post("/submit-form", async (req, res) => {
+    try {
+        const { first_name, second_name, email, phone, eircode } = req.body;
+
+        const cleanInput = {
+            first_name: String(first_name).replace(/[^a-zA-Z0-9]/g, ""),
+            second_name: String(second_name).replace(/[^a-zA-Z0-9]/g, ""),
+            email: String(email).trim(),
+            phone: String(phone).replace(/\D/g, ""),
+            eircode: String(eircode).trim(),
+        };
+
+        await db.insertRow(cleanInput);
+
+        res.json({ message: "Form data saved successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Internal error");
+    }
+});
