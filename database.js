@@ -50,3 +50,7 @@ async function insertRow(data) {
         data.eircode
     ]);
 }
+module.exports = {
+    ensureSchema,
+    insertRow
+};
